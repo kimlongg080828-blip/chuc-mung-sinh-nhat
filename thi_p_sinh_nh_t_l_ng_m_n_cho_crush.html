@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday My Special Someone 💕</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- QR Code Generator JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #ffd1dc 0%, #ffe6eb 50%, #fff0f5 100%);
+            overflow-x: hidden;
+        }
+
+        .font-handwriting {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        /* Glassmorphism card standard */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(255, 182, 193, 0.3);
+        }
+
+        /* Custom Floating Animation for Heart Particle canvas */
+        #heartCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Gift Box Animations */
+        .gift-box {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .gift-box:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+        .gift-lid {
+            transition: transform 0.5s ease-in-out;
+        }
+        .gift-box.open .gift-lid {
+            transform: translateY(-40px) rotate(-15deg);
+        }
+
+        /* Pulse glow for buttons */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(244, 114, 182, 0.6); }
+            50% { box-shadow: 0 0 25px rgba(244, 114, 182, 0.9); }
+        }
+        .pulse-btn {
+            animation: pulseGlow 2s infinite;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen relative flex flex-col items-center justify-between pb-12">
+
+    <!-- Canvas for Floating Hearts -->
+    <canvas id="heartCanvas"></canvas>
+
+    <!-- Background Music Audio Tag -->
+    <!-- Sound source using relaxing romantic royalty-free audio -->
+    <audio id="bgMusic" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-piano-112199.mp3"></audio>
+
+    <!-- Floating Audio Control Button -->
+    <div class="fixed top-5 right-5 z-50">
+        <button id="musicToggle" onclick="toggleMusic()" class="glass-card p-3 rounded-full text-pink-600 hover:text-pink-700 shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
+            <i id="musicIcon" class="fas fa-music text-xl"></i>
+        </button>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container max-w-4xl mx-auto px-4 py-8 z-10 space-y-12">
+
+        <!-- HEADER SECTION -->
+        <header class="text-center space-y-4 pt-6">
+            <div class="inline-block px-4 py-1.5 rounded-full bg-pink-100/80 text-pink-600 text-sm font-semibold tracking-wide uppercase shadow-sm">
+                🎉 Special Birthday Wishes For You 💕
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold font-handwriting text-pink-600 drop-shadow-md">
+                Happy Birthday, <span id="crushNameHeader" class="underline decoration-pink-300">Cậu Bé/Cô Gái Ấy</span>! ✨
+            </h1>
+            <p class="text-gray-600 italic text-base md:text-lg">"Hôm nay là một ngày đặc biệt, ngày mà cả thế giới đón chào một người tuyệt vời!"</p>
+        </header>
+
+        <!-- COUNTDOWN TIMER / DAYS TOGETHER COUNTER CARD -->
+        <div class="glass-card rounded-3xl p-6 md:p-8 text-center space-y-4">
+            <h2 class="text-xl md:text-2xl font-bold text-pink-600 flex items-center justify-center gap-2">
+                <i class="fas fa-clock text-pink-400"></i> Thời Gian Đồng Hành & Chờ Đợi
+            </h2>
+            <div id="counterTitle" class="text-gray-600 text-sm md:text-base">Số ngày chúng mình biết nhau / Đếm ngược sinh nhật</div>
+            
+            <div class="grid grid-cols-4 gap-2 md:gap-4 max-w-md mx-auto pt-2">
+                <div class="bg-white/80 rounded-2xl p-3 shadow-inner">
+                    <span id="days" class="block text-2xl md:text-4xl font-bold text-pink-600">00</span>
+                    <span class="text-xs text-gray-500 uppercase font-semibold">Ngày</span>
+                </div>
+                <div class="bg-white/80 rounded-2xl p-3 shadow-inner">
+                    <span id="hours" class="block text-2xl md:text-4xl font-bold text-pink-600">00</span>
+                    <span class="text-xs text-gray-500 uppercase font-semibold">Giờ</span>
+                </div>
+                <div class="bg-white/80 rounded-2xl p-3 shadow-inner">
+                    <span id="minutes" class="block text-2xl md:text-4xl font-bold text-pink-600">00</span>
+                    <span class="text-xs text-gray-500 uppercase font-semibold">Phút</span>
+                </div>
+                <div class="bg-white/80 rounded-2xl p-3 shadow-inner">
+                    <span id="seconds" class="block text-2xl md:text-4xl font-bold text-pink-600">00</span>
+                    <span class="text-xs text-gray-500 uppercase font-semibold">Giây</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPING EFFECT WISHES SECTION -->
+        <div class="glass-card rounded-3xl p-6 md:p-8 shadow-xl space-y-4 relative overflow-hidden">
+            <div class="absolute -right-6 -top-6 text-pink-100 opacity-50 pointer-events-none">
+                <i class="fas fa-quote-right text-9xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-pink-600 flex items-center gap-2">
+                <i class="fas fa-envelope-open-text"></i> Bức Thư Gửi Cậu
+            </h2>
+            <div class="min-h-[160px] bg-white/60 p-5 rounded-2xl text-gray-700 leading-relaxed text-base md:text-lg border border-pink-100 font-medium">
+                <span id="typingText"></span><span class="animate-pulse text-pink-500 font-bold">|</span>
+            </div>
+            <div class="flex justify-end">
+                <button onclick="triggerConfetti()" class="px-5 py-2.5 bg-gradient-to-r from-pink-400 to-rose-400 text-white rounded-full font-medium shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all text-sm flex items-center gap-2">
+                    <i class="fas fa-sparkles"></i> Bắn pháo hoa tặng cậu!
+                </button>
+            </div>
+        </div>
+
+        <!-- PHOTO SLIDESHOW / GALLERY -->
+        <div class="glass-card rounded-3xl p-6 md:p-8 space-y-6">
+            <div class="text-center space-y-1">
+                <h2 class="text-2xl font-bold text-pink-600">📸 Góc Kỉ Niệm Dễ Thương</h2>
+                <p class="text-sm text-gray-500">Những khoảnh khắc đáng yêu của tụi mình</p>
+            </div>
+
+            <!-- Carousel Wrapper -->
+            <div class="relative max-w-lg mx-auto overflow-hidden rounded-2xl shadow-xl border-4 border-white/80 group">
+                <div id="slidesContainer" class="flex transition-transform duration-500 ease-out">
+                    <!-- Image Slide 1 -->
+                    <div class="w-full flex-shrink-0 relative">
+                        <img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80" alt="Memory 1" class="w-full h-72 md:h-80 object-cover">
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white text-center text-sm">
+                            Nụ cười lung linh hơn cả ánh nắng ✨
+                        </div>
+                    </div>
+                    <!-- Image Slide 2 -->
+                    <div class="w-full flex-shrink-0 relative">
+                        <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80" alt="Memory 2" class="w-full h-72 md:h-80 object-cover">
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white text-center text-sm">
+                            Mỗi cuộc trò chuyện với cậu đều thật bình yên 💕
+                        </div>
+                    </div>
+                    <!-- Image Slide 3 -->
+                    <div class="w-full flex-shrink-0 relative">
+                        <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80" alt="Memory 3" class="w-full h-72 md:h-80 object-cover">
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white text-center text-sm">
+                            Chúc cậu tuổi mới luôn hạnh phúc và rực rỡ! 🎂
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carousel Controls -->
+                <button onclick="prevSlide()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 p-2.5 rounded-full shadow-md transition-all">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button onclick="nextSlide()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 p-2.5 rounded-full shadow-md transition-all">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SECRET GIFT BOX SECTION -->
+        <div class="glass-card rounded-3xl p-6 md:p-8 text-center space-y-6">
+            <div class="space-y-1">
+                <h2 class="text-2xl font-bold text-pink-600">🎁 Hộp Quà Bí Mật Phủ Đầy Điều Ước</h2>
+                <p class="text-sm text-gray-500">Bấm vào bất kỳ hộp quà nào để nhận đặc quyền nhé!</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+                <!-- Gift Box 1 -->
+                <div onclick="openGift(1)" class="gift-box bg-white/80 border border-pink-200 rounded-2xl p-6 shadow-sm hover:shadow-md flex flex-col items-center">
+                    <div id="giftIcon1" class="text-5xl text-pink-500 mb-3 gift-lid">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div id="giftTitle1" class="font-bold text-gray-700">Hộp Quà #1</div>
+                    <div id="giftResult1" class="hidden text-pink-600 font-bold text-sm mt-3 animate-bounce">
+                        🎟️ Voucher: 1 Buổi xem phim rạp tùy chọn cậu chọn! 🍿
+                    </div>
+                </div>
+
+                <!-- Gift Box 2 -->
+                <div onclick="openGift(2)" class="gift-box bg-white/80 border border-pink-200 rounded-2xl p-6 shadow-sm hover:shadow-md flex flex-col items-center">
+                    <div id="giftIcon2" class="text-5xl text-pink-500 mb-3 gift-lid">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div id="giftTitle2" class="font-bold text-gray-700">Hộp Quà #2</div>
+                    <div id="giftResult2" class="hidden text-pink-600 font-bold text-sm mt-3 animate-bounce">
+                        🧋 Voucher: 1 Ly Trà Sữa Size L bất kỳ lúc nào cậu thèm!
+                    </div>
+                </div>
+
+                <!-- Gift Box 3 -->
+                <div onclick="openGift(3)" class="gift-box bg-white/80 border border-pink-200 rounded-2xl p-6 shadow-sm hover:shadow-md flex flex-col items-center">
+                    <div id="giftIcon3" class="text-5xl text-pink-500 mb-3 gift-lid">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div id="giftTitle3" class="font-bold text-gray-700">Hộp Quà #3</div>
+                    <div id="giftResult3" class="hidden text-pink-600 font-bold text-sm mt-3 animate-bounce">
+                        🌟 Đặc quyền: 1 Điều ước bất kỳ tớ sẽ thực hiện cho cậu!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE PLAYFUL QUESTION -->
+        <div class="glass-card rounded-3xl p-6 md:p-8 text-center space-y-6 relative overflow-hidden min-h-[220px] flex flex-col justify-center items-center">
+            <h2 class="text-2xl font-bold text-pink-600">Cậu có thích món quà nhỏ này không? 🥺💕</h2>
+            
+            <div id="buttonArea" class="relative w-full h-24 flex justify-center items-center gap-6">
+                <!-- YES BUTTON -->
+                <button onclick="handleLoveYes()" class="pulse-btn px-8 py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-full text-lg shadow-lg hover:scale-110 active:scale-95 transition-all z-10">
+                    Cực kỳ thích luôn! 🥰
+                </button>
+
+                <!-- EVADING NO BUTTON -->
+                <button id="noBtn" onmouseover="moveNoButton()" onclick="moveNoButton()" class="px-6 py-2.5 bg-gray-200 text-gray-600 font-medium rounded-full text-base shadow transition-all duration-150 absolute">
+                    Không thích 😜
+                </button>
+            </div>
+            
+            <div id="loveResponse" class="hidden text-xl font-bold text-pink-600 mt-2 animate-pulse">
+                Yeahhh! Tớ biết ngay là cậu sẽ thích mà! 💖 Lên lịch hẹn hò thôi nào!
+            </div>
+        </div>
+
+        <!-- QR CODE GENERATOR SECTION -->
+        <div class="glass-card rounded-3xl p-6 md:p-8 space-y-6 border-2 border-pink-300">
+            <div class="text-center space-y-2">
+                <span class="bg-pink-200 text-pink-700 text-xs font-bold px-3 py-1 rounded-full uppercase">Tính năng dành cho bạn</span>
+                <h2 class="text-2xl font-bold text-pink-600 flex items-center justify-center gap-2">
+                    <i class="fas fa-qrcode"></i> Tạo Mã QR Để In Vào Thiệp Giấy
+                </h2>
+                <p class="text-sm text-gray-600">Sau khi hoàn tất chỉnh sửa, tạo mã QR này để in vào thiệp tặng crush quẹt mở trang web nhé!</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8 pt-2">
+                <!-- QR Display Container -->
+                <div class="bg-white p-4 rounded-2xl shadow-md border border-pink-100 flex flex-col items-center">
+                    <div id="qrcode" class="p-2"></div>
+                    <span class="text-xs text-gray-400 mt-2">Mã QR trang web này</span>
+                </div>
+
+                <!-- Input & Instructions -->
+                <div class="space-y-4 max-w-md w-full">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Đường dẫn (URL) trang web của bạn:</label>
+                        <input type="text" id="qrUrlInput" placeholder="Dán URL trang web sau khi host vào đây..." class="w-full px-4 py-2.5 rounded-xl border border-pink-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white/90">
+                    </div>
+                    <button onclick="generateCustomQR()" class="w-full py-2.5 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-xl text-sm shadow transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-sync-alt"></i> Cập Nhật Mã QR
+                    </button>
+
+                    <div class="bg-pink-50/80 p-3.5 rounded-xl text-xs text-pink-800 space-y-1.5 border border-pink-100">
+                        <p class="font-bold flex items-center gap-1"><i class="fas fa-lightbulb text-yellow-500"></i> Hướng dẫn tạo thiệp tặng:</p>
+                        <ol class="list-decimal list-inside space-y-1 opacity-90">
+                            <li>Lưu file mã QR về máy (Nhấp chuột phải chọn Lưu ảnh).</li>
+                            <li>In mã QR lên tấm thiệp giấy đáng yêu.</li>
+                            <li>Viết dòng chữ: <i>"Quét mã này để nhận bất ngờ nha!"</i>.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="text-center text-xs text-pink-500 font-medium py-4 z-10">
+        Created with ❤️ for your special day. Happy Birthday!
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* --- CONFIGURATION & CUSTOMIZABLE DATA --- */
+        const CONFIG = {
+            crushName: "Cậu",
+            // Un-comment and set start Date if counting days together:
+            // startDate: new Date("2023-05-20T00:00:00"), 
+            // Or target Birthday Date:
+            birthdayDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 1), // Default tomorrow
+            typingMessage: "Chúc cậu có một ngày sinh nhật thật ấm áp, ngập tràn niềm vui và tiếng cười! Cảm ơn cậu vì đã xuất hiện và mang đến nhiều điều tuyệt vời trong cuộc sống của tớ. Tuổi mới mong cậu luôn bình an, xinh đẹp, và sớm đạt được mọi ước mơ nhé! ✨💕"
+        };
+
+        // Populate crushing name
+        document.getElementById('crushNameHeader').innerText = CONFIG.crushName;
+
+        /* --- 1. BACKGROUND MUSIC LOGIC --- */
+        let isPlaying = false;
+        const bgMusic = document.getElementById('bgMusic');
+        const musicIcon = document.getElementById('musicIcon');
+
+        function toggleMusic() {
+            if (isPlaying) {
+                bgMusic.pause();
+                musicIcon.classList.remove('fa-compact-disc', 'fa-spin');
+                musicIcon.classList.add('fa-music');
+            } else {
+                bgMusic.play().catch(e => console.log("Audio play blocked by browser"));
+                musicIcon.classList.remove('fa-music');
+                musicIcon.classList.add('fa-compact-disc', 'fa-spin');
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // Auto play audio on first user click anywhere
+        document.body.addEventListener('click', function startAudioOnFirstInteraction() {
+            if (!isPlaying) {
+                toggleMusic();
+            }
+            document.body.removeEventListener('click', startAudioOnFirstInteraction);
+        }, { once: true });
+
+        /* --- 2. FLOATING HEARTS CANVAS ANIMATION --- */
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        class Heart {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = height + Math.random() * 100;
+                this.size = Math.random() * 12 + 8;
+                this.speedY = Math.random() * 1.5 + 0.8;
+                this.speedX = Math.sin(Math.random() * Math.PI) * 0.8;
+                this.opacity = Math.random() * 0.5 + 0.3;
+                this.color = `hsla(${Math.random() * 30 + 330}, 100%, 75%, ${this.opacity})`;
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                if (this.y < -20) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(-this.size / 2, -this.size / 2, -this.size, this.size / 3, 0, this.size);
+                ctx.bezierCurveTo(this.size, this.size / 3, this.size / 2, -this.size / 2, 0, 0);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        const hearts = Array.from({ length: 35 }, () => new Heart());
+
+        function animateHearts() {
+            ctx.clearRect(0, 0, width, height);
+            hearts.forEach(heart => {
+                heart.update();
+                heart.draw();
+            });
+            requestAnimationFrame(animateHearts);
+        }
+        animateHearts();
+
+        /* --- 3. COUNTDOWN / DAYS TIMER --- */
+        function updateTimer() {
+            const now = new Date();
+            const diff = CONFIG.birthdayDate - now;
+
+            if (diff > 0) {
+                // Countdown mode
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const m = Math.floor((diff / 1000 / 60) % 60);
+                const s = Math.floor((diff / 1000) % 60);
+
+                document.getElementById('days').innerText = String(d).padStart(2, '0');
+                document.getElementById('hours').innerText = String(h).padStart(2, '0');
+                document.getElementById('minutes').innerText = String(m).padStart(2, '0');
+                document.getElementById('seconds').innerText = String(s).padStart(2, '0');
+            } else {
+                document.getElementById('counterTitle').innerText = "Hôm nay chính là ngày tuyệt vời ấy! 🎂✨";
+                document.getElementById('days').innerText = "00";
+                document.getElementById('hours').innerText = "00";
+                document.getElementById('minutes').innerText = "00";
+                document.getElementById('seconds').innerText = "00";
+            }
+        }
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        /* --- 4. TYPING EFFECT --- */
+        let typeIdx = 0;
+        const typingSpeed = 50;
+        function typeWriter() {
+            if (typeIdx < CONFIG.typingMessage.length) {
+                document.getElementById("typingText").innerHTML += CONFIG.typingMessage.charAt(typeIdx);
+                typeIdx++;
+                setTimeout(typeWriter, typingSpeed);
+            }
+        }
+        setTimeout(typeWriter, 800);
+
+        /* --- 5. CONFETTI EFFECT --- */
+        function triggerConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#f472b6', '#fb7185', '#f43f5e', '#e879f9']
+            });
+        }
+
+        /* --- 6. PHOTO SLIDESHOW LOGIC --- */
+        let currentSlide = 0;
+        const slidesContainer = document.getElementById('slidesContainer');
+        const totalSlides = 3;
+
+        function updateSlide() {
+            slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlide();
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlide();
+        }
+
+        // Auto slide every 4s
+        setInterval(nextSlide, 4000);
+
+        /* --- 7. SECRET GIFT BOXES --- */
+        function openGift(index) {
+            const giftBox = event.currentTarget;
+            giftBox.classList.add('open');
+            document.getElementById(`giftResult${index}`).classList.remove('hidden');
+            triggerConfetti();
+        }
+
+        /* --- 8. EVADING "NO" BUTTON INTERACTION --- */
+        function moveNoButton() {
+            const noBtn = document.getElementById('noBtn');
+            const buttonArea = document.getElementById('buttonArea');
+            
+            const areaRect = buttonArea.getBoundingClientRect();
+            const btnRect = noBtn.getBoundingClientRect();
+
+            // Calculate random new positions within the parent box area
+            const maxX = (areaRect.width / 2) - (btnRect.width / 2);
+            const maxY = 40;
+
+            const randomX = (Math.random() * maxX * 2) - maxX;
+            const randomY = (Math.random() * maxY * 2) - maxY;
+
+            noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+        }
+
+        function handleLoveYes() {
+            document.getElementById('noBtn').classList.add('hidden');
+            document.getElementById('loveResponse').classList.remove('hidden');
+            triggerConfetti();
+        }
+
+        /* --- 9. QR CODE GENERATION --- */
+        let qrcodeObj = null;
+
+        function initQRCode(url) {
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = "";
+            qrcodeObj = new QRCode(qrContainer, {
+                text: url,
+                width: 140,
+                height: 140,
+                colorDark: "#db2777",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function generateCustomQR() {
+            const inputUrl = document.getElementById('qrUrlInput').value.trim();
+            if (inputUrl) {
+                initQRCode(inputUrl);
+            } else {
+                initQRCode(window.location.href);
+            }
+        }
+
+        // Default QR code setup with current URL
+        window.addEventListener('load', () => {
+            const currentUrl = window.location.href;
+            document.getElementById('qrUrlInput').value = currentUrl;
+            initQRCode(currentUrl);
+        });
+    </script>
+</body>
+</html>
