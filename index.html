@@ -3,544 +3,871 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy Birthday My Special Someone 💕</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
+    <title>Happy Birthday Phương Thảo ✨</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&family=Nunito:wght@400;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Canvas Confetti -->
+    <!-- Canvas Confetti Library -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <!-- QR Code Generator JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS & JS (Thư viện Bản đồ) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
+        :root {
+            --pink-main: #ff85a2;
+            --pink-soft: #fbc4ab;
+            --pink-light: #fff0f5;
+            --cream: #fff9e6;
+            --yellow-warm: #ffe5ec;
+            --text-color: #5d4037;
+            --shadow: 0 10px 30px rgba(255, 133, 162, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
         body {
-            font-family: 'Quicksand', sans-serif;
-            background: linear-gradient(135deg, #ffd1dc 0%, #ffe6eb 50%, #fff0f5 100%);
+            font-family: 'Quicksand', 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #ffe5ec 0%, #ffcad4 50%, #f4acb7 100%);
+            min-height: 100vh;
+            color: var(--text-color);
             overflow-x: hidden;
+            position: relative;
         }
 
-        .font-handwriting {
-            font-family: 'Dancing Script', cursive;
-        }
-
-        /* Glassmorphism card standard */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px 0 rgba(255, 182, 193, 0.3);
-        }
-
-        /* Custom Floating Animation for Heart Particle canvas */
-        #heartCanvas {
+        #bg-canvas {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             pointer-events: none;
             z-index: 1;
         }
 
-        /* Gift Box Animations */
-        .gift-box {
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             position: relative;
+            z-index: 2;
+        }
+
+        .card-box {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 28px;
+            padding: 35px 25px;
+            width: 100%;
+            box-shadow: var(--shadow);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #countdown-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .countdown-title {
+            font-family: 'Itim', cursive;
+            font-size: 2.2rem;
+            color: #d81b60;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        }
+
+        .countdown-sub {
+            font-size: 1rem;
+            color: #704214;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .timer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .timer-box {
+            background: linear-gradient(145deg, #ffffff, #ffe3ec);
+            border-radius: 18px;
+            padding: 15px 5px;
+            box-shadow: 0 6px 15px rgba(255, 133, 162, 0.2);
+            border: 2px solid #fff;
+        }
+
+        .timer-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ff477e;
+            font-family: 'Itim', cursive;
+        }
+
+        .timer-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #8d5b4c;
+            text-transform: uppercase;
+        }
+
+        .btn-open-gift {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff477e, #ff85a2);
+            color: white;
+            font-family: 'Itim', cursive;
+            font-size: 1.6rem;
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
             cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-        .gift-box:hover {
-            transform: scale(1.05) rotate(2deg);
-        }
-        .gift-lid {
-            transition: transform 0.5s ease-in-out;
-        }
-        .gift-box.open .gift-lid {
-            transform: translateY(-40px) rotate(-15deg);
+            box-shadow: 0 8px 25px rgba(255, 71, 126, 0.5);
+            animation: pulseGlow 1.5s infinite alternate;
+            transition: all 0.3s ease;
+            margin-top: 15px;
         }
 
-        /* Pulse glow for buttons */
         @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 15px rgba(244, 114, 182, 0.6); }
-            50% { box-shadow: 0 0 25px rgba(244, 114, 182, 0.9); }
-        }
-        .pulse-btn {
-            animation: pulseGlow 2s infinite;
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 71, 126, 0.4); }
+            100% { transform: scale(1.06); box-shadow: 0 0 30px rgba(255, 71, 126, 0.8); }
         }
 
-        /* Smooth scroll */
-        html {
-            scroll-behavior: smooth;
+        .pass-card {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease-out;
+            width: 100%;
         }
+
+        .pass-input {
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 2px solid #ff85a2;
+            font-family: 'Itim', cursive;
+            font-size: 1.3rem;
+            text-align: center;
+            outline: none;
+            width: 80%;
+            max-width: 280px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .pass-btn {
+            background: #ff477e;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-family: 'Itim', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 71, 126, 0.3);
+            transition: all 0.2s;
+        }
+
+        .shake { animation: shake 0.4s ease-in-out; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        #main-screen {
+            display: none;
+            width: 100%;
+        }
+
+        .crush-header-title {
+            font-family: 'Itim', cursive;
+            font-size: 2.5rem;
+            color: #d81b60;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px #fff;
+        }
+
+        .cake-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto 30px;
+            cursor: pointer;
+        }
+
+        .cake {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+        }
+
+        .plate {
+            width: 180px;
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin: 0 auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .layer {
+            display: block;
+            width: 100%;
+            height: 38px;
+            border-radius: 10px 10px 0 0;
+            position: relative;
+        }
+
+        .layer-bottom { background: #fca311; width: 160px; margin: 0 auto; }
+        .layer-middle { background: #ffb703; width: 130px; margin: 0 auto; }
+        .layer-top { background: #ff85a2; width: 100px; margin: 0 auto; }
+
+        .icing {
+            background: #ffffff;
+            height: 12px;
+            border-radius: 10px 10px 5px 5px;
+            width: 100%;
+        }
+
+        .candle {
+            background: repeating-linear-gradient(45deg, #fff, #fff 5px, #ff477e 5px, #ff477e 10px);
+            width: 12px;
+            height: 35px;
+            margin: 0 auto;
+            position: relative;
+            border-radius: 3px;
+        }
+
+        .flame {
+            position: absolute;
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 18px;
+            background: #ffb703;
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: 0 0 10px #ffb703, 0 0 20px #ffb703;
+            animation: flicker 0.6s infinite alternate;
+            transform-origin: center bottom;
+        }
+
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1) rotate(-2deg); }
+            100% { transform: translateX(-50%) scale(1.15) rotate(2deg); }
+        }
+
+        .flame.off { display: none; }
+
+        .cake-hint {
+            font-size: 0.9rem;
+            color: #e63946;
+            font-weight: 700;
+            margin-top: 5px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+
+        .interactive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .widget-card {
+            background: linear-gradient(135deg, #ffffff 0%, #fff0f5 100%);
+            border-radius: 20px;
+            padding: 20px 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 2px solid #fff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .widget-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 133, 162, 0.3);
+            border-color: #ff85a2;
+        }
+
+        .widget-icon { font-size: 2.2rem; margin-bottom: 10px; }
+        .widget-title { font-weight: 700; font-size: 1.05rem; color: #d81b60; margin-bottom: 5px; }
+        .widget-desc { font-size: 0.85rem; color: #666; }
+
+        .hug-btn {
+            background: #ff477e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .floating-heart {
+            position: fixed;
+            pointer-events: none;
+            animation: floatUp 1.2s ease-out forwards;
+            font-size: 1.5rem;
+            z-index: 999;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.4); }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-body {
+            background: #fff;
+            border-radius: 25px;
+            max-width: 580px;
+            width: 100%;
+            padding: 25px;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            border: 3px solid var(--pink-soft);
+        }
+
+        #map-container {
+            width: 100%;
+            height: 320px;
+            border-radius: 16px;
+            margin: 10px 0 15px;
+            border: 2px solid var(--pink-main);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .custom-tooltip {
+            background: #ff477e !important;
+            color: #ffffff !important;
+            border: 1px solid #ffffff !important;
+            border-radius: 12px !important;
+            font-weight: 700 !important;
+            font-family: 'Quicksand', sans-serif !important;
+            padding: 4px 8px !important;
+            font-size: 0.8rem !important;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2) !important;
+        }
+        .custom-tooltip::before {
+            border-top-color: #ff477e !important;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .letter-content {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #4a3e3d;
+            text-align: left;
+            white-space: pre-line;
+            background: #fff0f5;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 15px;
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .interactive-question {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 20px;
+            position: relative;
+        }
+        .question-title { font-size: 1.2rem; font-weight: 700; color: #d81b60; margin-bottom: 15px; }
+        .btn-group { display: flex; justify-content: center; gap: 20px; position: relative; min-height: 50px; }
+        .btn-choice { padding: 10px 25px; border-radius: 25px; font-family: 'Itim', cursive; font-size: 1.1rem; border: none; cursor: pointer; }
+        .btn-yes { background: #ff477e; color: white; }
+        .btn-no { background: #e0e0e0; color: #555; position: relative; }
     </style>
 </head>
-<body class="text-gray-800 min-h-screen relative flex flex-col items-center justify-between pb-12">
+<body>
 
-    <!-- Canvas for Floating Hearts -->
-    <canvas id="heartCanvas"></canvas>
+    <canvas id="bg-canvas"></canvas>
 
-    <!-- Background Music Audio Tag -->
-    <!-- Sound source using relaxing romantic royalty-free audio -->
-    <audio id="bgMusic" loop src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-piano-112199.mp3"></audio>
+    <!-- 🎵 FILE NHẠC TỰ ĐỘNG PHÁT KHI MỞ MÀN HÌNH CHÍNH -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="nhac.mp3" type="audio/mpeg">
+    </audio>
 
-    <!-- Floating Audio Control Button -->
-    <div class="fixed top-5 right-5 z-50">
-        <button id="musicToggle" onclick="toggleMusic()" class="glass-card p-3 rounded-full text-pink-600 hover:text-pink-700 shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
-            <i id="musicIcon" class="fas fa-music text-xl"></i>
-        </button>
-    </div>
+    <div class="container">
 
-    <!-- MAIN CONTAINER -->
-    <div class="container max-w-4xl mx-auto px-4 py-8 z-10 space-y-12">
+        <!-- MÀN HÌNH ĐẾM NGƯỢC & NHẬP MẬT KHẨU -->
+        <div id="countdown-screen" class="card-box">
+            <h1 class="countdown-title">🎁 Đang chờ bất ngờ... ✨</h1>
+            <p class="countdown-sub">Hãy quay lại vào đúng <b>00:00 ngày 31/10</b> nhé,<br>có một món quà siêu đáng yêu đang chờ cậu mở ra đó! 💖</p>
 
-        <!-- HEADER SECTION -->
-        <header class="text-center space-y-4 pt-6">
-            <div class="inline-block px-4 py-1.5 rounded-full bg-pink-100/80 text-pink-600 text-sm font-semibold tracking-wide uppercase shadow-sm">
-                🎉 Special Birthday Wishes For You 💕
+            <div class="timer-grid" id="timer-grid">
+                <div class="timer-box"><div class="timer-value" id="days">00</div><div class="timer-label">Ngày</div></div>
+                <div class="timer-box"><div class="timer-value" id="hours">00</div><div class="timer-label">Giờ</div></div>
+                <div class="timer-box"><div class="timer-value" id="minutes">00</div><div class="timer-label">Phút</div></div>
+                <div class="timer-box"><div class="timer-value" id="seconds">00</div><div class="timer-label">Giây</div></div>
             </div>
-            <h1 class="text-4xl md:text-6xl font-bold font-handwriting text-pink-600 drop-shadow-md">
-                Happy Birthday, <span id="crushNameHeader" class="underline decoration-pink-300">Cậu Bé/Cô Gái Ấy</span>! ✨
-            </h1>
-            <p class="text-gray-600 italic text-base md:text-lg">"Hôm nay là một ngày đặc biệt, ngày mà cả thế giới đón chào một người tuyệt vời!"</p>
-        </header>
 
-        <!-- COUNTDOWN TIMER / DAYS TOGETHER COUNTER CARD -->
-        <div class="glass-card rounded-3xl p-6 md:p-8 text-center space-y-4">
-            <h2 class="text-xl md:text-2xl font-bold text-pink-600 flex items-center justify-center gap-2">
-                <i class="fas fa-clock text-pink-400"></i> Thời Gian Đồng Hành & Chờ Đợi
-            </h2>
-            <div id="counterTitle" class="text-gray-600 text-sm md:text-base">Số ngày chúng mình biết nhau / Đếm ngược sinh nhật</div>
-            
-            <div class="grid grid-cols-4 gap-2 md:gap-4 max-w-md mx-auto pt-2">
-                <div class="bg-white/80 rounded-2xl p-3 shadow-inner">
-                    <span id="days" class="block text-2xl md:text-4xl font-bold text-pink-600">00</span>
-                    <span class="text-xs text-gray-500 uppercase font-semibold">Ngày</span>
-                </div>
-                <div class="bg-white/80 rounded-2xl p-3 shadow-inner">
-                    <span id="hours" class="block text-2xl md:text-4xl font-bold text-pink-600">00</span>
-                    <span class="text-xs text-gray-500 uppercase font-semibold">Giờ</span>
-                </div>
-                <div class="bg-white/80 rounded-2xl p-3 shadow-inner">
-                    <span id="minutes" class="block text-2xl md:text-4xl font-bold text-pink-600">00</span>
-                    <span class="text-xs text-gray-500 uppercase font-semibold">Phút</span>
-                </div>
-                <div class="bg-white/80 rounded-2xl p-3 shadow-inner">
-                    <span id="seconds" class="block text-2xl md:text-4xl font-bold text-pink-600">00</span>
-                    <span class="text-xs text-gray-500 uppercase font-semibold">Giây</span>
-                </div>
+            <button class="btn-open-gift" id="btn-open-gift" onclick="showPasswordCard()">MỞ QUÀ 🎁</button>
+
+            <div class="pass-card" id="pass-card">
+                <p style="font-weight: 700; color: #d81b60;">🔐 Nhập mật khẩu bí mật để mở món quà:</p>
+                <input type="password" id="pass-input" class="pass-input" placeholder="••••" maxlength="10">
+                <button class="pass-btn" onclick="checkPassword()">Mở Quà Ngay ✨</button>
+                <p class="pass-hint" id="pass-hint">Hint: Ngày sinh của cậu nè (DDMM)</p>
             </div>
         </div>
 
-        <!-- TYPING EFFECT WISHES SECTION -->
-        <div class="glass-card rounded-3xl p-6 md:p-8 shadow-xl space-y-4 relative overflow-hidden">
-            <div class="absolute -right-6 -top-6 text-pink-100 opacity-50 pointer-events-none">
-                <i class="fas fa-quote-right text-9xl"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-pink-600 flex items-center gap-2">
-                <i class="fas fa-envelope-open-text"></i> Bức Thư Gửi Cậu
-            </h2>
-            <div class="min-h-[160px] bg-white/60 p-5 rounded-2xl text-gray-700 leading-relaxed text-base md:text-lg border border-pink-100 font-medium">
-                <span id="typingText"></span><span class="animate-pulse text-pink-500 font-bold">|</span>
-            </div>
-            <div class="flex justify-end">
-                <button onclick="triggerConfetti()" class="px-5 py-2.5 bg-gradient-to-r from-pink-400 to-rose-400 text-white rounded-full font-medium shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all text-sm flex items-center gap-2">
-                    <i class="fas fa-sparkles"></i> Bắn pháo hoa tặng cậu!
-                </button>
-            </div>
-        </div>
+        <!-- MÀN HÌNH CHÍNH -->
+        <div id="main-screen" class="card-box">
+            <h1 class="crush-header-title" id="display-title">Happy Birthday! 🎉</h1>
+            <p style="font-size: 1.1rem; color: #8d5b4c; font-weight: 600;">Chúc cậu một ngày sinh nhật thật ấm áp và luôn mỉm cười rạng rỡ! ✨</p>
 
-        <!-- PHOTO SLIDESHOW / GALLERY -->
-        <div class="glass-card rounded-3xl p-6 md:p-8 space-y-6">
-            <div class="text-center space-y-1">
-                <h2 class="text-2xl font-bold text-pink-600">📸 Góc Kỉ Niệm Dễ Thương</h2>
-                <p class="text-sm text-gray-500">Những khoảnh khắc đáng yêu của tụi mình</p>
-            </div>
-
-            <!-- Carousel Wrapper -->
-            <div class="relative max-w-lg mx-auto overflow-hidden rounded-2xl shadow-xl border-4 border-white/80 group">
-                <div id="slidesContainer" class="flex transition-transform duration-500 ease-out">
-                    <!-- Image Slide 1 -->
-                    <div class="w-full flex-shrink-0 relative">
-                        <img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=800&q=80" alt="Memory 1" class="w-full h-72 md:h-80 object-cover">
-                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white text-center text-sm">
-                            Nụ cười lung linh hơn cả ánh nắng ✨
-                        </div>
-                    </div>
-                    <!-- Image Slide 2 -->
-                    <div class="w-full flex-shrink-0 relative">
-                        <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=800&q=80" alt="Memory 2" class="w-full h-72 md:h-80 object-cover">
-                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white text-center text-sm">
-                            Mỗi cuộc trò chuyện với cậu đều thật bình yên 💕
-                        </div>
-                    </div>
-                    <!-- Image Slide 3 -->
-                    <div class="w-full flex-shrink-0 relative">
-                        <img src="https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80" alt="Memory 3" class="w-full h-72 md:h-80 object-cover">
-                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white text-center text-sm">
-                            Chúc cậu tuổi mới luôn hạnh phúc và rực rỡ! 🎂
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Carousel Controls -->
-                <button onclick="prevSlide()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 p-2.5 rounded-full shadow-md transition-all">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button onclick="nextSlide()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 p-2.5 rounded-full shadow-md transition-all">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- SECRET GIFT BOX SECTION -->
-        <div class="glass-card rounded-3xl p-6 md:p-8 text-center space-y-6">
-            <div class="space-y-1">
-                <h2 class="text-2xl font-bold text-pink-600">🎁 Hộp Quà Bí Mật Phủ Đầy Điều Ước</h2>
-                <p class="text-sm text-gray-500">Bấm vào bất kỳ hộp quà nào để nhận đặc quyền nhé!</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-                <!-- Gift Box 1 -->
-                <div onclick="openGift(1)" class="gift-box bg-white/80 border border-pink-200 rounded-2xl p-6 shadow-sm hover:shadow-md flex flex-col items-center">
-                    <div id="giftIcon1" class="text-5xl text-pink-500 mb-3 gift-lid">
-                        <i class="fas fa-gift"></i>
-                    </div>
-                    <div id="giftTitle1" class="font-bold text-gray-700">Hộp Quà #1</div>
-                    <div id="giftResult1" class="hidden text-pink-600 font-bold text-sm mt-3 animate-bounce">
-                        🎟️ Voucher: 1 Buổi xem phim rạp tùy chọn cậu chọn! 🍿
-                    </div>
-                </div>
-
-                <!-- Gift Box 2 -->
-                <div onclick="openGift(2)" class="gift-box bg-white/80 border border-pink-200 rounded-2xl p-6 shadow-sm hover:shadow-md flex flex-col items-center">
-                    <div id="giftIcon2" class="text-5xl text-pink-500 mb-3 gift-lid">
-                        <i class="fas fa-gift"></i>
-                    </div>
-                    <div id="giftTitle2" class="font-bold text-gray-700">Hộp Quà #2</div>
-                    <div id="giftResult2" class="hidden text-pink-600 font-bold text-sm mt-3 animate-bounce">
-                        🧋 Voucher: 1 Ly Trà Sữa Size L bất kỳ lúc nào cậu thèm!
-                    </div>
-                </div>
-
-                <!-- Gift Box 3 -->
-                <div onclick="openGift(3)" class="gift-box bg-white/80 border border-pink-200 rounded-2xl p-6 shadow-sm hover:shadow-md flex flex-col items-center">
-                    <div id="giftIcon3" class="text-5xl text-pink-500 mb-3 gift-lid">
-                        <i class="fas fa-gift"></i>
-                    </div>
-                    <div id="giftTitle3" class="font-bold text-gray-700">Hộp Quà #3</div>
-                    <div id="giftResult3" class="hidden text-pink-600 font-bold text-sm mt-3 animate-bounce">
-                        🌟 Đặc quyền: 1 Điều ước bất kỳ tớ sẽ thực hiện cho cậu!
-                    </div>
+            <div class="cake-container" onclick="blowCandle()">
+                <div class="cake">
+                    <div class="candle"><div class="flame" id="flame"></div></div>
+                    <div class="layer layer-top"><div class="icing"></div></div>
+                    <div class="layer layer-middle"><div class="icing"></div></div>
+                    <div class="layer layer-bottom"><div class="icing"></div></div>
+                    <div class="plate"></div>
                 </div>
             </div>
-        </div>
+            <p class="cake-hint" id="cake-hint">🎂 Bấm vào ngọn nến để thổi nến nhé!</p>
 
-        <!-- INTERACTIVE PLAYFUL QUESTION -->
-        <div class="glass-card rounded-3xl p-6 md:p-8 text-center space-y-6 relative overflow-hidden min-h-[220px] flex flex-col justify-center items-center">
-            <h2 class="text-2xl font-bold text-pink-600">Cậu có thích món quà nhỏ này không? 🥺💕</h2>
-            
-            <div id="buttonArea" class="relative w-full h-24 flex justify-center items-center gap-6">
-                <!-- YES BUTTON -->
-                <button onclick="handleLoveYes()" class="pulse-btn px-8 py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-full text-lg shadow-lg hover:scale-110 active:scale-95 transition-all z-10">
-                    Cực kỳ thích luôn! 🥰
-                </button>
-
-                <!-- EVADING NO BUTTON -->
-                <button id="noBtn" onmouseover="moveNoButton()" onclick="moveNoButton()" class="px-6 py-2.5 bg-gray-200 text-gray-600 font-medium rounded-full text-base shadow transition-all duration-150 absolute">
-                    Không thích 😜
-                </button>
-            </div>
-            
-            <div id="loveResponse" class="hidden text-xl font-bold text-pink-600 mt-2 animate-pulse">
-                Yeahhh! Tớ biết ngay là cậu sẽ thích mà! 💖 Lên lịch hẹn hò thôi nào!
-            </div>
-        </div>
-
-        <!-- QR CODE GENERATOR SECTION -->
-        <div class="glass-card rounded-3xl p-6 md:p-8 space-y-6 border-2 border-pink-300">
-            <div class="text-center space-y-2">
-                <span class="bg-pink-200 text-pink-700 text-xs font-bold px-3 py-1 rounded-full uppercase">Tính năng dành cho bạn</span>
-                <h2 class="text-2xl font-bold text-pink-600 flex items-center justify-center gap-2">
-                    <i class="fas fa-qrcode"></i> Tạo Mã QR Để In Vào Thiệp Giấy
-                </h2>
-                <p class="text-sm text-gray-600">Sau khi hoàn tất chỉnh sửa, tạo mã QR này để in vào thiệp tặng crush quẹt mở trang web nhé!</p>
-            </div>
-
-            <div class="flex flex-col md:flex-row items-center justify-center gap-8 pt-2">
-                <!-- QR Display Container -->
-                <div class="bg-white p-4 rounded-2xl shadow-md border border-pink-100 flex flex-col items-center">
-                    <div id="qrcode" class="p-2"></div>
-                    <span class="text-xs text-gray-400 mt-2">Mã QR trang web này</span>
+            <div class="interactive-grid">
+                <div class="widget-card" onclick="openModal('letter')">
+                    <div class="widget-icon">✉️</div>
+                    <div class="widget-title">Bí mật</div>
+                    <div class="widget-desc">Bấm vào đây để mở bức thư tớ gửi riêng cho cậu</div>
                 </div>
 
-                <!-- Input & Instructions -->
-                <div class="space-y-4 max-w-md w-full">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Đường dẫn (URL) trang web của bạn:</label>
-                        <input type="text" id="qrUrlInput" placeholder="Dán URL trang web sau khi host vào đây..." class="w-full px-4 py-2.5 rounded-xl border border-pink-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white/90">
-                    </div>
-                    <button onclick="generateCustomQR()" class="w-full py-2.5 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-xl text-sm shadow transition-all flex items-center justify-center gap-2">
-                        <i class="fas fa-sync-alt"></i> Cập Nhật Mã QR
-                    </button>
+                <div class="widget-card" onclick="openModal('gift')">
+                    <div class="widget-icon">🗺️</div>
+                    <div class="widget-title">Bản đồ đi chơi</div>
+                    <div class="widget-desc">Bấm chọn địa điểm ở Hà Nội cậu muốn đi nhé!</div>
+                </div>
 
-                    <div class="bg-pink-50/80 p-3.5 rounded-xl text-xs text-pink-800 space-y-1.5 border border-pink-100">
-                        <p class="font-bold flex items-center gap-1"><i class="fas fa-lightbulb text-yellow-500"></i> Hướng dẫn tạo thiệp tặng:</p>
-                        <ol class="list-decimal list-inside space-y-1 opacity-90">
-                            <li>Lưu file mã QR về máy (Nhấp chuột phải chọn Lưu ảnh).</li>
-                            <li>In mã QR lên tấm thiệp giấy đáng yêu.</li>
-                            <li>Viết dòng chữ: <i>"Quét mã này để nhận bất ngờ nha!"</i>.</li>
-                        </ol>
-                    </div>
+                <div class="widget-card" onclick="sendVirtualHug(event)">
+                    <div class="widget-icon">🧸</div>
+                    <div class="widget-title">Cái ôm ấm áp</div>
+                    <div class="widget-desc" id="hug-count-text">Đã gửi 0 cái ôm</div>
+                    <button class="hug-btn">Gửi thêm cái ôm 💕</button>
+                </div>
+            </div>
+
+            <div class="interactive-question">
+                <div class="question-title">Cậu có thích món quà sinh nhật bất ngờ này không? 🥰</div>
+                <div class="btn-group" id="btn-group">
+                    <button class="btn-choice btn-yes" onclick="answerYes()">Thích lắm luôn! ❤️</button>
+                    <button class="btn-choice btn-no" id="btn-no" onmouseover="moveNoButton()" onclick="moveNoButton()">Không thích 😜</button>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!-- FOOTER -->
-    <footer class="text-center text-xs text-pink-500 font-medium py-4 z-10">
-        Created with ❤️ for your special day. Happy Birthday!
-    </footer>
+    <!-- MODAL POPUP -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-body">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title" style="font-family: 'Itim', cursive; color: #d81b60; font-size: 1.8rem;">Tiêu đề</h2>
+            <div id="modal-content"></div>
+        </div>
+    </div>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
-        /* --- CONFIGURATION & CUSTOMIZABLE DATA --- */
-        const CONFIG = {
-            crushName: "Cậu",
-            // Un-comment and set start Date if counting days together:
-            // startDate: new Date("2023-05-20T00:00:00"), 
-            // Or target Birthday Date:
-            birthdayDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 1), // Default tomorrow
-            typingMessage: "Chúc cậu có một ngày sinh nhật thật ấm áp, ngập tràn niềm vui và tiếng cười! Cảm ơn cậu vì đã xuất hiện và mang đến nhiều điều tuyệt vời trong cuộc sống của tớ. Tuổi mới mong cậu luôn bình an, xinh đẹp, và sớm đạt được mọi ước mơ nhé! ✨💕"
-        };
+        const CRUSH_NAME = "Phương Thảo";
+        const TARGET_DATE = "2026-10-31T00:00:00";
+        const GIFT_PASSWORD = "3110";
+        const PASS_HINT = "Hint: Ngày sinh của cậu nè (DDMM)";
+        const FORMSPREE_ENDPOINT = "https://formspree.io/f/moejkrrq";
 
-        // Populate crushing name
-        document.getElementById('crushNameHeader').innerText = CONFIG.crushName;
+        const LOVE_LETTER_TEXT = `Chúc mừng sinh nhật cậu! ✨\n\nChúc cậu tuổi mới luôn ngập tràn niềm vui, xinh đẹp, bình an và đạt được tất cả những điều ước mà cậu hằng mong muốn. Cảm ơn cậu vì đã xuất hiện và mang lại thật nhiều năng lượng tích cực cho những ngày vừa qua.\n\nHy vọng món quà nhỏ nhắn đáng yêu này sẽ mang lại cho cậu một nụ cười thật tươi trong ngày special này nhé! 🌸💖`;
 
-        /* --- 1. BACKGROUND MUSIC LOGIC --- */
-        let isPlaying = false;
-        const bgMusic = document.getElementById('bgMusic');
-        const musicIcon = document.getElementById('musicIcon');
+        const SUGGESTED_LOCATIONS = [
+            { name: "🛍️ Lotte Mall Tây Hồ", lat: 21.0718, lng: 105.8115 },
+            { name: "🛍️ AEON Mall Hà Đông", lat: 20.9886, lng: 105.7533 },
+            { name: "🛍️ AEON Mall Long Biên", lat: 21.0264, lng: 105.8973 },
+            { name: "🏰 Vincom Mega Mall Royal City", lat: 21.0031, lng: 105.8152 },
+            { name: "🐠 Vincom Mega Mall Times City", lat: 20.9953, lng: 105.8678 },
+            { name: "🍦 Lượn Hồ Tây & Ăn Kem Tràng Tiền", lat: 21.0478, lng: 105.8236 },
+            { name: "☕ Cà Phê Chill Phố Cổ", lat: 21.0333, lng: 105.8500 },
+            { name: "🚶 Phố Đi Bộ Hồ Gươm", lat: 21.0285, lng: 105.8542 },
+            { name: "🌻 Dạo Lăng Bác & Hoàng Thành", lat: 21.0338, lng: 105.8350 },
+            { name: "🎬 Bãi Đá Sông Hồng Chill Sunset", lat: 21.0825, lng: 105.8310 },
+            { name: "🎬 Tràng Tiền Plaza & Nhà Hát Lớn", lat: 21.0252, lng: 105.8575 },
+            { name: "🍲 Phố Ẩm Thực Tạ Hiện", lat: 21.0345, lng: 105.8525 }
+        ];
 
-        function toggleMusic() {
-            if (isPlaying) {
-                bgMusic.pause();
-                musicIcon.classList.remove('fa-compact-disc', 'fa-spin');
-                musicIcon.classList.add('fa-music');
-            } else {
-                bgMusic.play().catch(e => console.log("Audio play blocked by browser"));
-                musicIcon.classList.remove('fa-music');
-                musicIcon.classList.add('fa-compact-disc', 'fa-spin');
-            }
-            isPlaying = !isPlaying;
-        }
+        let countdownTimer = null;
+        let isCandleBlown = false;
+        let hugCount = 0;
+        let mapObj = null;
+        let userGhimMarker = null;
+        let selectedLat = null;
+        let selectedLng = null;
+        let selectedLocationName = "";
 
-        // Auto play audio on first user click anywhere
-        document.body.addEventListener('click', function startAudioOnFirstInteraction() {
-            if (!isPlaying) {
-                toggleMusic();
-            }
-            document.body.removeEventListener('click', startAudioOnFirstInteraction);
-        }, { once: true });
+        function updateCountdown() {
+            const target = new Date(TARGET_DATE).getTime();
+            const now = new Date().getTime();
+            const diff = target - now;
 
-        /* --- 2. FLOATING HEARTS CANVAS ANIMATION --- */
-        const canvas = document.getElementById('heartCanvas');
-        const ctx = canvas.getContext('2d');
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-
-        window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        });
-
-        class Heart {
-            constructor() {
-                this.reset();
-            }
-            reset() {
-                this.x = Math.random() * width;
-                this.y = height + Math.random() * 100;
-                this.size = Math.random() * 12 + 8;
-                this.speedY = Math.random() * 1.5 + 0.8;
-                this.speedX = Math.sin(Math.random() * Math.PI) * 0.8;
-                this.opacity = Math.random() * 0.5 + 0.3;
-                this.color = `hsla(${Math.random() * 30 + 330}, 100%, 75%, ${this.opacity})`;
-            }
-            update() {
-                this.y -= this.speedY;
-                this.x += this.speedX;
-                if (this.y < -20) {
-                    this.reset();
-                }
-            }
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.bezierCurveTo(-this.size / 2, -this.size / 2, -this.size, this.size / 3, 0, this.size);
-                ctx.bezierCurveTo(this.size, this.size / 3, this.size / 2, -this.size / 2, 0, 0);
-                ctx.fill();
-                ctx.restore();
-            }
-        }
-
-        const hearts = Array.from({ length: 35 }, () => new Heart());
-
-        function animateHearts() {
-            ctx.clearRect(0, 0, width, height);
-            hearts.forEach(heart => {
-                heart.update();
-                heart.draw();
-            });
-            requestAnimationFrame(animateHearts);
-        }
-        animateHearts();
-
-        /* --- 3. COUNTDOWN / DAYS TIMER --- */
-        function updateTimer() {
-            const now = new Date();
-            const diff = CONFIG.birthdayDate - now;
-
-            if (diff > 0) {
-                // Countdown mode
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const m = Math.floor((diff / 1000 / 60) % 60);
-                const s = Math.floor((diff / 1000) % 60);
-
-                document.getElementById('days').innerText = String(d).padStart(2, '0');
-                document.getElementById('hours').innerText = String(h).padStart(2, '0');
-                document.getElementById('minutes').innerText = String(m).padStart(2, '0');
-                document.getElementById('seconds').innerText = String(s).padStart(2, '0');
-            } else {
-                document.getElementById('counterTitle').innerText = "Hôm nay chính là ngày tuyệt vời ấy! 🎂✨";
+            if (diff <= 0) {
+                clearInterval(countdownTimer);
                 document.getElementById('days').innerText = "00";
                 document.getElementById('hours').innerText = "00";
                 document.getElementById('minutes').innerText = "00";
                 document.getElementById('seconds').innerText = "00";
+                document.getElementById('btn-open-gift').style.display = 'inline-block';
+                return;
             }
-        }
-        setInterval(updateTimer, 1000);
-        updateTimer();
 
-        /* --- 4. TYPING EFFECT --- */
-        let typeIdx = 0;
-        const typingSpeed = 50;
-        function typeWriter() {
-            if (typeIdx < CONFIG.typingMessage.length) {
-                document.getElementById("typingText").innerHTML += CONFIG.typingMessage.charAt(typeIdx);
-                typeIdx++;
-                setTimeout(typeWriter, typingSpeed);
-            }
-        }
-        setTimeout(typeWriter, 800);
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-        /* --- 5. CONFETTI EFFECT --- */
-        function triggerConfetti() {
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#f472b6', '#fb7185', '#f43f5e', '#e879f9']
-            });
+            document.getElementById('days').innerText = d < 10 ? '0' + d : d;
+            document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
+            document.getElementById('minutes').innerText = m < 10 ? '0' + m : m;
+            document.getElementById('seconds').innerText = s < 10 ? '0' + s : s;
         }
 
-        /* --- 6. PHOTO SLIDESHOW LOGIC --- */
-        let currentSlide = 0;
-        const slidesContainer = document.getElementById('slidesContainer');
-        const totalSlides = 3;
+        countdownTimer = setInterval(updateCountdown, 1000);
+        updateCountdown();
 
-        function updateSlide() {
-            slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+        function showPasswordCard() {
+            document.getElementById('btn-open-gift').style.display = 'none';
+            document.getElementById('pass-card').style.display = 'flex';
+            document.getElementById('pass-hint').innerText = PASS_HINT;
         }
 
-        function nextSlide() {
-            currentSlide = (currentSlide + 1) % totalSlides;
-            updateSlide();
-        }
+        function checkPassword() {
+            const input = document.getElementById('pass-input').value;
+            const passCard = document.getElementById('pass-card');
 
-        function prevSlide() {
-            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-            updateSlide();
-        }
-
-        // Auto slide every 4s
-        setInterval(nextSlide, 4000);
-
-        /* --- 7. SECRET GIFT BOXES --- */
-        function openGift(index) {
-            const giftBox = event.currentTarget;
-            giftBox.classList.add('open');
-            document.getElementById(`giftResult${index}`).classList.remove('hidden');
-            triggerConfetti();
-        }
-
-        /* --- 8. EVADING "NO" BUTTON INTERACTION --- */
-        function moveNoButton() {
-            const noBtn = document.getElementById('noBtn');
-            const buttonArea = document.getElementById('buttonArea');
-            
-            const areaRect = buttonArea.getBoundingClientRect();
-            const btnRect = noBtn.getBoundingClientRect();
-
-            // Calculate random new positions within the parent box area
-            const maxX = (areaRect.width / 2) - (btnRect.width / 2);
-            const maxY = 40;
-
-            const randomX = (Math.random() * maxX * 2) - maxX;
-            const randomY = (Math.random() * maxY * 2) - maxY;
-
-            noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
-        }
-
-        function handleLoveYes() {
-            document.getElementById('noBtn').classList.add('hidden');
-            document.getElementById('loveResponse').classList.remove('hidden');
-            triggerConfetti();
-        }
-
-        /* --- 9. QR CODE GENERATION --- */
-        let qrcodeObj = null;
-
-        function initQRCode(url) {
-            const qrContainer = document.getElementById("qrcode");
-            qrContainer.innerHTML = "";
-            qrcodeObj = new QRCode(qrContainer, {
-                text: url,
-                width: 140,
-                height: 140,
-                colorDark: "#db2777",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-        }
-
-        function generateCustomQR() {
-            const inputUrl = document.getElementById('qrUrlInput').value.trim();
-            if (inputUrl) {
-                initQRCode(inputUrl);
+            if (input === GIFT_PASSWORD) {
+                unlockMainScreen();
             } else {
-                initQRCode(window.location.href);
+                passCard.classList.add('shake');
+                alert("Sai mật khẩu rồi nè, thử lại đi nha 😜");
+                setTimeout(() => { passCard.classList.remove('shake'); }, 500);
             }
         }
 
-        // Default QR code setup with current URL
-        window.addEventListener('load', () => {
-            const currentUrl = window.location.href;
-            document.getElementById('qrUrlInput').value = currentUrl;
-            initQRCode(currentUrl);
-        });
+        function unlockMainScreen() {
+            document.getElementById('countdown-screen').style.display = 'none';
+            document.getElementById('main-screen').style.display = 'block';
+            document.getElementById('display-title').innerText = `Happy Birthday ${CRUSH_NAME}! ✨`;
+            triggerConfetti();
+            playAudio();
+        }
+
+        function blowCandle() {
+            if (!isCandleBlown) {
+                document.getElementById('flame').classList.add('off');
+                document.getElementById('cake-hint').innerText = "✨ Cậu đã thổi nến ước điều ước rồi! Happy Birthday! 🎉";
+                document.getElementById('cake-hint').style.color = "#d81b60";
+                isCandleBlown = true;
+                triggerConfetti();
+            }
+        }
+
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+        }
+
+        function sendVirtualHug(e) {
+            hugCount++;
+            document.getElementById('hug-count-text').innerText = `Đã gửi ${hugCount} cái ôm ấm áp 💖`;
+
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.innerText = '💖';
+            heart.style.left = (e.clientX || window.innerWidth / 2) + 'px';
+            heart.style.top = (e.clientY || window.innerHeight / 2) + 'px';
+            document.body.appendChild(heart);
+
+            setTimeout(() => { heart.remove(); }, 1200);
+        }
+
+        function openModal(type) {
+            const overlay = document.getElementById('modal-overlay');
+            const title = document.getElementById('modal-title');
+            const content = document.getElementById('modal-content');
+
+            if (type === 'letter') {
+                title.innerText = "Bí mật 💌";
+                content.className = "letter-content";
+                content.innerHTML = LOVE_LETTER_TEXT;
+                overlay.style.display = 'flex';
+            } else if (type === 'gift') {
+                title.innerText = "Bản đồ đi chơi Hà Nội 📍";
+                content.className = "";
+                content.innerHTML = `
+                    <p style="font-weight: 700; color: #d81b60; margin-bottom: 8px;">
+                        Sinh nhật này tớ bao! Cậu chạm chọn điểm gợi ý trên bản đồ hoặc ghim địa điểm tùy ý nhé:
+                    </p>
+                    <div id="map-container"></div>
+                    <p id="map-status" style="font-size: 0.85rem; color: #704214; font-style: italic; margin-bottom: 12px;">
+                        📍 Hãy chạm chọn địa điểm trên bản đồ!
+                    </p>
+                    <button id="btn-confirm-loc" onclick="confirmMapLocation()" style="background: #ff477e; color: white; border: none; padding: 10px 25px; border-radius: 25px; font-weight: 700; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 12px rgba(255,71,126,0.3);">
+                        Chốt vị trí này nha! ✨
+                    </button>
+                `;
+                overlay.style.display = 'flex';
+                initHanoiMap();
+            }
+        }
+
+        function initHanoiMap() {
+            setTimeout(() => {
+                const hanoiLat = 21.028511;
+                const hanoiLng = 105.834167;
+
+                if (mapObj) {
+                    mapObj.remove();
+                }
+
+                mapObj = L.map('map-container').setView([hanoiLat, hanoiLng], 12);
+
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                    maxZoom: 19,
+                    attribution: 'Tiles &copy; Esri'
+                }).addTo(mapObj);
+
+                SUGGESTED_LOCATIONS.forEach(loc => {
+                    const marker = L.marker([loc.lat, loc.lng]).addTo(mapObj);
+                    
+                    marker.bindTooltip(loc.name, {
+                        permanent: true,
+                        direction: 'top',
+                        className: 'custom-tooltip',
+                        offset: [0, -10]
+                    });
+
+                    marker.on('click', function() {
+                        selectedLat = loc.lat;
+                        selectedLng = loc.lng;
+                        selectedLocationName = loc.name;
+
+                        document.getElementById('map-status').innerText = `📍 Đã chọn: ${loc.name}`;
+                        document.getElementById('map-status').style.color = '#d81b60';
+                    });
+                });
+
+                mapObj.on('click', function(e) {
+                    selectedLat = e.latlng.lat;
+                    selectedLng = e.latlng.lng;
+                    selectedLocationName = "Vị trí ghim tùy chọn";
+
+                    if (userGhimMarker) {
+                        mapObj.removeLayer(userGhimMarker);
+                    }
+
+                    userGhimMarker = L.marker([selectedLat, selectedLng]).addTo(mapObj);
+                    userGhimMarker.bindTooltip("Vị trí ghim của cậu 📍", {
+                        permanent: true,
+                        direction: 'top',
+                        className: 'custom-tooltip',
+                        offset: [0, -10]
+                    });
+
+                    document.getElementById('map-status').innerText = `📍 Đã ghim vị trí mới: (${selectedLat.toFixed(4)}, ${selectedLng.toFixed(4)})`;
+                    document.getElementById('map-status').style.color = '#d81b60';
+                });
+            }, 200);
+        }
+
+        function confirmMapLocation() {
+            if (!selectedLat || !selectedLng) {
+                alert("Cậu bấm chọn 1 điểm gợi ý hoặc ghim 1 vị trí trên bản đồ trước nha! 📍✨");
+                return;
+            }
+
+            const btnConfirm = document.getElementById('btn-confirm-loc');
+            btnConfirm.innerText = "Đang gửi vị trí... ⏳";
+            btnConfirm.disabled = true;
+
+            const googleMapsUrl = `https://www.google.com/maps?q=${selectedLat},${selectedLng}`;
+
+            fetch(FORMSPREE_ENDPOINT, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({
+                    crush_name: CRUSH_NAME,
+                    diadiem_duoc_chon: selectedLocationName,
+                    toado_gmap: googleMapsUrl,
+                    message: `${CRUSH_NAME} đã chốt kèo sinh nhật: ${selectedLocationName} (${googleMapsUrl})`
+                })
+            })
+            .then(response => {
+                alert(`Chốt deal thành công! Tớ đã nhận được lựa chọn của cậu rồi nhé! 🥰✨`);
+                closeModal();
+                triggerConfetti();
+            })
+            .catch(error => {
+                alert(`Tớ đã ghi nhớ lựa chọn của cậu rồi nha! 🥰✨`);
+                closeModal();
+                triggerConfetti();
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+
+        function moveNoButton() {
+            const btnNo = document.getElementById('btn-no');
+            const x = Math.random() * (window.innerWidth - 150) - (window.innerWidth / 2 - 70);
+            const y = Math.random() * 200 - 100;
+            btnNo.style.transform = `translate(${x}px, ${y}px)`;
+        }
+
+        function answerYes() {
+            alert(`Tớ biết ngay là cậu sẽ thích mà! 🥰✨`);
+            triggerConfetti();
+        }
+
+        const audio = document.getElementById('bg-music');
+
+        function playAudio() {
+            audio.play().catch((err) => {
+                console.log("Trình duyệt chặn autoplay âm thanh cho đến khi có tương tác.");
+            });
+        }
+
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const particles = [];
+        const colors = ['#ff85a2', '#fbc4ab', '#ffe5ec', '#ffffff', '#b5e2fa'];
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.size = Math.random() * 12 + 6;
+                this.speedY = Math.random() * 1.5 + 0.8;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.isHeart = Math.random() > 0.5;
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += Math.sin(this.y / 20) * 0.5;
+                if (this.y > canvas.height) {
+                    this.y = -10;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                if (this.isHeart) {
+                    ctx.font = `${this.size}px serif`;
+                    ctx.fillText('🌸', this.x, this.y);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        for (let i = 0; i < 35; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
     </script>
 </body>
 </html>
